@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civil Study Hub</title>
+    <style>
+        /* --- Universal Box Sizing --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Ensure the html and body take up the full height and have no default margin */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif; /* A fallback font is good practice */
+        }
+
+        body {
+            background-color: #f8f9fa; /* A light, neutral background color */
+
+            /* Smooth transition for background changes */
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #theme-toggle:hover {
+            background-color: #ddd;
+        }
+
+        /* --- Dark Mode Styles --- */
+        body.dark-mode {
+            background-color: #1c1c1e; /* A dark background for dark mode */
+        }
+
+        body.dark-mode #theme-toggle {
+            background-color: #2c2c2c;
+            color: #fff;
+            border-color: #555;
+        }
+
+        body.dark-mode h1 {
+            color: white;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark-mode .subtitle {
+            color: #e0e0e0;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        body.dark-mode .folder {
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        body.dark-mode .sub-folder-header,
+        body.dark-mode .back-button {
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* --- Header & Logo Styles --- */
+        header {
+            display: flex;
+            align-items: center; /* Vertically aligns the logo and title */
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px; /* Padding for the header bar */
+            margin: 0;
+        }
+
+        #logo {
+            height: 120px; /* Set height for the logo */
+            width: 120px;  /* Set width for a square shape */
+            object-fit: cover; /* Ensures image fills the square without distortion */
+            border-radius: 8px; /* Optional: rounded corners for the logo */
+        }
+
+        .header-text {
+            flex-grow: 1; /* Allows the text block to fill the remaining space */
+            display: flex;
+            flex-direction: column; /* Stacks the title and subtitle */
+            align-items: center; /* Horizontally centers the text */
+            padding: 0 15px; /* Space between logo and text */
+        }
+
+        h1 {
+            color: black;
+            /* Slightly smaller font to accommodate subtitle */
+            font-size: clamp(1.6rem, 3.5vw, 3rem);
+            font-weight: bold;
+            z-index: 10;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Subtitle Styles (for the quote) --- */
+        .subtitle {
+            color: black;
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem); /* Even larger responsive font */
+            font-style: italic;
+            margin: 5px 0 0 0; /* Small top margin to separate from title */
+            padding: 0;
+            max-width: 95%; /* Prevents long quotes from overflowing on small screens */
+            text-align: center;
+        }
+
+        /* --- Folder Grid Styles --- */
+        .folder-grid-container {
+            display: grid;
+            /* Creates 3 columns of equal width */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px; /* Space between folders */
+            max-width: 1200px;
+            margin: 20px auto; /* Reduced top/bottom margin and auto for horizontal centering */
+            padding: 20px;
+        }
+
+        .folder {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: black;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .folder:hover {
+            transform: translateY(-8px); /* Lifts the folder on hover */
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .folder-icon {
+            font-size: 4rem; /* Large folder icon */
+            line-height: 1;
+        }
+
+        .folder-label {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* --- Responsive Grid Adjustments --- */
+        @media (max-width: 900px) {
+            .folder-grid-container {
+                /* Switch to 2 columns on tablets */
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .folder-grid-container {
+                /* Switch to a single column on mobile phones */
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- Navigation & Sub-folder Styles --- */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Makes the link wrapper not interfere with the grid layout */
+        .folder-link {
+            text-decoration: none;
+            color: inherit;
+            display: contents;
+        }
+
+        .sub-folder-header {
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            color: black;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #sub-folder-title {
+            font-size: 2rem;
+        }
+
+        /* --- Video Thumbnail Styles --- */
+        .video-thumbnail {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden; /* To keep the image corners rounded */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .video-thumbnail:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .video-thumbnail-img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 16 / 9; /* Common video aspect ratio */
+            object-fit: cover;
+        }
+
+        .video-thumbnail-label {
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img id="logo" src="civilstudyhub.png" alt="Civil Study Hub Logo">
+        <div class="header-text">
+            <h1>Civil Study Hub</h1>
+            <p class="subtitle">"Success is not final, failure is not fatal: It is the courage to continue that counts." - Winston Churchill</p>
+        </div>
+    </header>
+    <main id="main-grid" class="folder-grid-container"></main>
+
+    <!-- Sub-folder View (initially hidden) -->
+    <div id="sub-folder-view" class="hidden">
+        <div class="sub-folder-header">
+            <a href="#" class="back-button">← Back</a>
+            <h2 id="sub-folder-title"></h2>
+        </div>
+        <div id="sub-folder-grid" class="folder-grid-container">
+            <!-- Sub-folders will be generated here by JS -->
+        </div>
+    </div>
+
+    <button id="theme-toggle" title="Toggle dark/light mode">🌙</button>
+
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+
+            // Update button icon and save preference
+            if (body.classList.contains('dark-mode')) {
+                themeToggle.innerHTML = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeToggle.innerHTML = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Check for saved theme in localStorage on page load
+        if (localStorage.getItem('theme') === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggle.innerHTML = '☀️';
+        }
+
+        // --- Folder Navigation Logic ---
+        const mainGrid = document.getElementById('main-grid');
+        const subFolderView = document.getElementById('sub-folder-view');
+        const subFolderGrid = document.getElementById('sub-folder-grid');
+        const subFolderTitle = document.getElementById('sub-folder-title');
+        const backButton = document.querySelector('.back-button');
+        
+        // Data structure for the entire folder hierarchy
+        // - An object value indicates a directory.
+        // - A string value indicates a direct link (like a video).
+        // - A `null` value indicates a final page link to be generated.
+        const folderStructure = {
+            "History of India": {
+                "Ancient India": {
+                    "Ancient India 1": "https://drive.google.com/file/d/1vEVT0mXZg9VpZig4j4ZZOEOeQQfostCi/view?usp=drive_link",
+                    "Ancient India 2": "#",
+                    "Ancient India 3": "#",
+                    "Ancient India 4": "#",
+                    "Ancient India 5": "#",
+                    "Ancient India 6": "#",
+                    "Ancient India 7": "#",
+                    "Ancient India 8": "#",
+                    "Ancient India 9": "#"
+                },
+                "Medieval India": null,
+                "Modern India": {
+                    "Modern India 1": null,
+                    "Modern India 2": null
+                }
+            },
+            "Geography": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Polity": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Economics": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "World History": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Art & Culture": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Post Independence India": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "International Relations": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Maps": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Environment": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Subject 11": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+            "Subject 12": { "Sub-folder 1": null, "Sub-folder 2": null, "Sub-folder 3": null },
+        };
+
+        let currentPath = []; // e.g., ['History of India', 'Modern India']
+
+        // Function to get the current folder object from the path
+        function getCurrentLevel() {
+            let level = folderStructure;
+            for (const folderName of currentPath) {
+                if (level[folderName]) {
+                    level = level[folderName];
+                }
+            }
+            return level;
+        }
+
+        // Main rendering function
+        function renderView() {
+            const currentLevel = getCurrentLevel();
+            const folderNames = Object.keys(currentLevel);
+
+            const isMainGrid = currentPath.length === 0;
+            const grid = isMainGrid ? mainGrid : subFolderGrid;
+
+            // Show/hide the correct view
+            mainGrid.classList.toggle('hidden', !isMainGrid);
+            subFolderView.classList.toggle('hidden', isMainGrid);
+
+            grid.innerHTML = ''; // Clear the grid before populating
+
+            // Update title to act as breadcrumbs
+            subFolderTitle.textContent = isMainGrid ? '' : currentPath.join(' / ');
+
+            // Populate the grid
+            for (const name of folderNames) {
+                const subLevel = currentLevel[name];
+                const isDirectory = subLevel !== null && typeof subLevel === 'object'; // A directory is an object
+
+                if (isDirectory) {
+                    // It's a folder that can be opened
+                    const folderDiv = document.createElement('div');
+                    folderDiv.className = 'folder';
+                    folderDiv.dataset.folderName = name;
+                    folderDiv.innerHTML = `
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-label">${name}</div>
+                    `;
+                    grid.appendChild(folderDiv);
+                } else if (typeof subLevel === 'string') {
+                    // It's a direct link (video)
+                    const link = document.createElement('a');
+                    link.href = subLevel; // The URL is the value
+                    link.target = "_blank"; // Open videos in a new tab
+                    link.rel = "noopener noreferrer";
+                    link.className = 'video-thumbnail';
+                    link.innerHTML = `
+                        <img src="https://placehold.co/400x225/2c2c2e/ffffff?text=${encodeURIComponent(name)}" alt="${name}" class="video-thumbnail-img">
+                        <div class="video-thumbnail-label">${name}</div>
+                    `;
+                    grid.appendChild(link);
+                } else {
+                    // It's a leaf node (a final page link, where subLevel is null)
+                    const pathSlug = [...currentPath, name].join('/').toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+                    const link = document.createElement('a');
+                    link.href = `/${pathSlug}.html`; // Example link
+                    link.className = 'folder-link';
+                    link.innerHTML = `
+                        <div class="folder">
+                            <div class="folder-icon">📄</div>
+                            <div class="folder-label">${name}</div>
+                        </div>
+                    `;
+                    grid.appendChild(link);
+                }
+            }
+        }
+
+        // Use event delegation for handling clicks on folders
+        function handleFolderClick(event) {
+            const folder = event.target.closest('.folder');
+            if (!folder || !folder.dataset.folderName) return;
+
+            currentPath.push(folder.dataset.folderName);
+            renderView();
+        }
+
+        mainGrid.addEventListener('click', handleFolderClick);
+        subFolderGrid.addEventListener('click', handleFolderClick);
+
+        function goBack() {
+            if (currentPath.length > 0) {
+                currentPath.pop();
+                renderView();
+            }
+        }
+
+        backButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            goBack();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            const target = event.target;
+            const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+            if (event.key === 'Backspace' && !isTyping && currentPath.length > 0) {
+                event.preventDefault();
+                goBack();
+            }
+        });
+
+        // Initial render on page load
+        document.addEventListener('DOMContentLoaded', renderView);
+    </script>
+</body>
+</html>
