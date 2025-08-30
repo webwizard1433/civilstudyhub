@@ -401,7 +401,7 @@
                     // It's a leaf node (a final page link, where subLevel is null)
                     const pathSlug = [...currentPath, name].join('/').toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
                     const link = document.createElement('a');
-                    link.href = `/${pathSlug}.html`; // Example link
+                    link.href = `${pathSlug}.html`; // Example link (relative path)
                     link.className = 'folder-link';
                     link.innerHTML = `
                         <div class="folder">
