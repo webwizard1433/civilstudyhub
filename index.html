@@ -79,6 +79,11 @@
             text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
         }
 
+        body.dark-mode .video-thumbnail-label {
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5); /* Consistent shadow for dark mode */
+        }
+
         /* --- Header & Logo Styles --- */
         header {
             display: flex;
@@ -258,8 +263,11 @@
 
         .video-thumbnail-label {
             padding: 15px;
+            color: black; /* Default text color for light mode */
             font-weight: 600;
             text-align: center;
+            font-size: 1.1rem; /* Increased font size for better visibility */
+            transition: color 0.3s; /* Smooth color transition for theme change */
         }
     </style>
 </head>
@@ -447,7 +455,7 @@
                     link.rel = "noopener noreferrer";
                     link.className = 'video-thumbnail';
                     link.innerHTML = `
-                        <img src="https://placehold.co/400x225/2c2c2e/ffffff?text=${encodeURIComponent(name)}" alt="${name}" class="video-thumbnail-img">
+                        <img src="https://media.istockphoto.com/id/1206928671/video/clicking-play-and-stop-button-on-computer-screen-animation-animation.jpg?s=640x640&k=20&c=US4VXh4Wjs24enscd1tI9y5qgZE-OUoqDzF_8Ci11U8=" alt="${name}" class="video-thumbnail-img">
                         <div class="video-thumbnail-label">${name}</div>
                     `;
                     grid.appendChild(link);
